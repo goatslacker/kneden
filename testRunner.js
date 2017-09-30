@@ -1,7 +1,12 @@
 const { transformFileSync } = require('babel-core')
 
-const { code } = transformFileSync('./josh-tests/extra-tick-test.js')
-const vm = require('vm')
+const BabelPluginAsyncToPromise = require('./')
+
+const { code } = transformFileSync('./josh-tests/array-expr-exec-order.js', {
+  plugins: [
+    [BabelPluginAsyncToPromise],
+  ]
+})
 
 function errorHandler(err) {
   console.log(code)
