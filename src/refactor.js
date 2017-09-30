@@ -192,6 +192,8 @@ export const RefactorVisitor = extend({
     }
   },
   SwitchStatement(path) {
+    throw new SyntaxError('Not implemented')
+
     // converts a switch statement in a bunch of if statements that compare the
     // discriminant to each test. Falling through is handled by a 'match'
     // variable, and the break statement is handled by a variable 'brokenOut'.
