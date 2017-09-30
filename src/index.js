@@ -79,7 +79,7 @@ const MainVisitor = {
 
         // build the promise chain
         const chain = new PromiseChain(depth > 1, node.dirtyAllowed, respID, errID);
-        chain.add(path.get('body.body'));
+        chain.add(path.get('body.body'))
         newBody.push(returnStatement(chain.toAST()));
 
         // combine all the newly generated stuff.

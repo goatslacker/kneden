@@ -25,7 +25,9 @@ module.exports = class PromiseChain {
     this._respName = respName;
     this._errName = errName;
 
-    this._ast = newExpression(identifier('Promise'), [
+    this.resolved = false
+
+    this.ast = newExpression(identifier('Promise'), [
       functionExpression(
         null,
         [
@@ -35,11 +37,41 @@ module.exports = class PromiseChain {
         blockStatement([])
       ),
     ])
+    this.firstBlock = this.ast.arguments[0].body
   }
   add(block) {
     if (!block.length) {
       return;
     }
+
+    if (!this.resolved) {
+      let current = this.firstBlock
+      block.forEach(path => {
+        const awaitInfos = []
+        path.traverse(PromisifyPrepVisitor, { awaitInfos, respName: this._respName });
+
+        if (!awaitInfos.length && this.ast.type === 'NewExpression' && path.node.type === 'ReturnStatement') {
+            const arg = path.node.argument
+            path.remove()
+            path.node = callExpression(identifier('resolve'), [arg])
+        }
+
+        awaitInfos.forEach(awaitInfo => {
+          current.body.push(callExpression(identifier('resolve'), [awaitInfo.arg]));
+          const params = awaitInfo.passID ? [identifier(this._respName)] : [];
+          current = this._addLink('then', params)
+        })
+
+        if (path.node) {
+          current.body.push(path.node);
+        }
+      });
+
+      this.resolved = true
+      return
+    }
+
+
     let current = this._addLink('then', []);
     block.forEach(path => {
       const awaitInfos = [];
@@ -55,6 +87,7 @@ module.exports = class PromiseChain {
       }
     });
   }
+
   _addLink(type, params, secondParams) {
     this._cleanup();
 
@@ -68,8 +101,8 @@ module.exports = class PromiseChain {
       handlers.push(functionExpression(null, secondParams, secondHandlerBody));
     }
 
-    const method = memberExpression(this._ast, identifier(type));
-    this._ast = callExpression(method, handlers);
+    const method = memberExpression(this.ast, identifier(type));
+    this.ast = callExpression(method, handlers);
 
     return current;
   }
@@ -82,12 +115,12 @@ module.exports = class PromiseChain {
     // part
     const chopOff = (
       this._dirtyAllowed &&
-      this._ast.callee.property.name === 'then' &&
-      this._ast.arguments.length === 1 &&
-      !this._ast.arguments[0].body.body.length
+      this.ast.callee.property.name === 'then' &&
+      this.ast.arguments.length === 1 &&
+      !this.ast.arguments[0].body.body.length
     );
     if (chopOff) {
-      this._ast = this._ast.callee.object;
+      this.ast = this.ast.callee.object;
     }
   }
   addCatch(block, errID) {
@@ -122,9 +155,9 @@ module.exports = class PromiseChain {
   }
   toAST() {
 //    this._cleanup();
-    return this._ast;
+    return this.ast;
 
-    const callee = this._ast.callee.object.callee;
+    const callee = this.ast.callee.object.callee;
     if (this._inner && callee && callee.object.name === 'Promise') {
       // only one handler to the promise - because we're in an inner function
       // there's no reason to wrap the handler in promise code. Convenienly,
@@ -134,9 +167,9 @@ module.exports = class PromiseChain {
       // ``Promise.resolve().then(function () {...})``
       // becomes
       // ``function () {...}()``
-      return callExpression(this._ast.arguments[0], []);
+      return callExpression(this.ast.arguments[0], []);
     }
-    return this._ast;
+    return this.ast;
   }
 }
 
@@ -154,5 +187,5 @@ const PromisifyPrepVisitor = extend({
       }
       this.awaitInfos.push(info);
     }
-  }
+  },
 }, NoSubFunctionsVisitor);
