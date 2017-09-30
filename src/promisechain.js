@@ -1,4 +1,4 @@
-import {
+const {
   blockStatement,
   callExpression,
   cloneDeep,
@@ -9,11 +9,11 @@ import {
   newExpression,
   returnStatement,
   throwStatement
-} from 'babel-types';
-import {extend} from 'js-extend';
-import {NoSubFunctionsVisitor} from './utils';
+} = require('babel-types')
+const {extend} = require('js-extend')
+const {NoSubFunctionsVisitor} = require('./utils')
 
-export default class PromiseChain {
+module.exports = class PromiseChain {
   // add, addCatch and addFinally were designed to be called only one time each
   // at most. Call them more at your own risk.
   //

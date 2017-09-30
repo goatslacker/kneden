@@ -1,4 +1,4 @@
-import {
+const {
   arrayExpression,
   awaitExpression,
   binaryExpression,
@@ -16,23 +16,23 @@ import {
   objectExpression,
   returnStatement,
   unaryExpression
-} from 'babel-types';
-import {extend} from 'js-extend';
+} = require('babel-types')
+const {extend} = require('js-extend')
 
-import PromiseChain from './promisechain';
-import {
+const PromiseChain = require('./promisechain')
+const {
   assign,
   awaitStatement,
   containsAwait,
   NoSubFunctionsVisitor,
   wrapFunction
-} from './utils';
-import {FirstPassIfVisitor, SecondPassIfVisitor} from './ifrefactor';
-import PartialLoopRefactorVisitor from './looprefactor';
+} = require('./utils')
+const {FirstPassIfVisitor, SecondPassIfVisitor} = require('./ifrefactor')
+const PartialLoopRefactorVisitor = require('./looprefactor')
 
-export const IfRefactorVisitor = SecondPassIfVisitor;
+const IfRefactorVisitor = SecondPassIfVisitor;
 
-export const RefactorVisitor = extend({
+const RefactorVisitor = extend({
   AwaitExpression(path) {
     // ``return await x`` becomes just ``return x``
     if (isReturnStatement(path.parent)) {
@@ -288,3 +288,9 @@ const SwitchBreakReplacementVisitor = extend({
 
 const wrapAwaitContaining =
   node => wrapFunction(blockStatement([returnStatement(node)]));
+
+
+module.exports = {
+  IfRefactorVisitor,
+  RefactorVisitor,
+}

@@ -1,6 +1,6 @@
-import hoistVariables from 'babel-helper-hoist-variables';
+const hoistVariables = require('babel-helper-hoist-variables')
 
-import {
+const {
   blockStatement,
   identifier,
   isBlockStatement,
@@ -11,10 +11,10 @@ import {
   thisExpression,
   variableDeclaration,
   variableDeclarator
-} from 'babel-types';
+} = require('babel-types')
 
-import {RefactorVisitor, IfRefactorVisitor} from './refactor';
-import PromiseChain from './promisechain';
+const {RefactorVisitor, IfRefactorVisitor} = require('./refactor')
+const PromiseChain = require('./promisechain')
 
 module.exports = () => ({
   visitor: WrapperVisitor,

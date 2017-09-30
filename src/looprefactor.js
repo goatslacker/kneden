@@ -1,4 +1,4 @@
-import {
+const {
   awaitExpression,
   blockStatement,
   callExpression,
@@ -8,19 +8,19 @@ import {
   ifStatement,
   returnStatement,
   whileStatement
-} from 'babel-types';
-import template from 'babel-template';
-import {extend} from 'js-extend';
+} = require('babel-types')
+const template = require('babel-template')
+const {extend} = require('js-extend')
 
-import {
+const {
   awaitStatement,
   containsAwait,
   NoSubFunctionsVisitor,
   matcher,
   wrapFunction
-} from './utils';
+} = require('./utils')
 
-export default {
+module.exports = {
   LabeledStatement: {
     // Babel seems to auto-remove labels from the AST if they don't make sense
     // in a position. That makes it hard to keep track of if you're in a loop

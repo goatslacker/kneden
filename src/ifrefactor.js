@@ -1,4 +1,4 @@
-import {
+const {
   awaitExpression,
   blockStatement,
   ensureBlock,
@@ -9,19 +9,19 @@ import {
   logicalExpression,
   returnStatement,
   unaryExpression
-} from 'babel-types';
+} = require('babel-types')
 
-import {
+const {
   assign,
   containsAwait,
   matcher,
   NoSubFunctionsVisitor,
   wrapFunction
-} from './utils';
+} = require('./utils')
 
-import {extend} from 'js-extend';
+const {extend} = require('js-extend')
 
-export const FirstPassIfVisitor = {
+const FirstPassIfVisitor = {
   IfStatement(path) {
     const {node} = path;
     ensureBlock(node, 'consequent');
@@ -83,7 +83,7 @@ export const FirstPassIfVisitor = {
 
 const containsReturnOrAwait = matcher(['ReturnStatement', 'AwaitExpression'], NoSubFunctionsVisitor);
 
-export const SecondPassIfVisitor = extend({
+const SecondPassIfVisitor = extend({
   IfStatement(path) {
     const alt = path.node.alternate;
     if (!path.node.consequent.body.length && alt && alt.body.length) {
@@ -158,4 +158,9 @@ function extendElse(ifStmt, extraBody) {
   if (body.length) {
     ifStmt.alternate = blockStatement(body);
   }
+}
+
+module.exports = {
+  FirstPassIfVisitor,
+  SecondPassIfVisitor,
 }

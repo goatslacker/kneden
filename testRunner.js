@@ -1,6 +1,6 @@
 const { transformFileSync } = require('babel-core')
 
-const BabelPluginAsyncToPromise = require('./')
+const BabelPluginAsyncToPromise = require('./src/index')
 
 const { code } = transformFileSync('./josh-tests/array-expr-exec-order.js', {
   plugins: [

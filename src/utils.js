@@ -1,21 +1,21 @@
-import {
+const {
   assignmentExpression,
   awaitExpression,
   callExpression,
   expressionStatement,
   functionExpression
-} from 'babel-types';
-import {extend} from 'js-extend';
+} = require('babel-types')
+const {extend} = require('js-extend')
 
-export const NoSubFunctionsVisitor = {
+const NoSubFunctionsVisitor = {
   Function(path) {
     path.skip();
   }
 }
 
-export const containsAwait = matcher(['AwaitExpression'], NoSubFunctionsVisitor);
+const containsAwait = matcher(['AwaitExpression'], NoSubFunctionsVisitor);
 
-export function matcher(types, base) {
+function matcher(types, base) {
   const MatchVisitor = extend({}, base);
   types.forEach(type => {
     MatchVisitor[type] = function (path) {
@@ -36,13 +36,23 @@ export function matcher(types, base) {
   }
 }
 
-export function wrapFunction(body) {
+function wrapFunction(body) {
   const func = functionExpression(null, [], body, false, true);
   func.dirtyAllowed = true;
   return callExpression(func, []);
 }
 
-export const awaitStatement = arg => expressionStatement(awaitExpression(arg));
+const awaitStatement = arg => expressionStatement(awaitExpression(arg));
 
-export const assign = (a, b) =>
+const assign = (a, b) =>
   expressionStatement(assignmentExpression('=', a, b));
+
+
+module.exports = {
+  NoSubFunctionsVisitor,
+  assign,
+  awaitStatement,
+  containsAwait,
+  matcher,
+  wrapFunction,
+}
