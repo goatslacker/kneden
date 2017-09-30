@@ -18,3 +18,4 @@ function errorHandler(err) {
 process.on('unhandledRejection', errorHandler)
 process.on('uncaughtException', errorHandler)
 eval(code)
+//console.log(code)

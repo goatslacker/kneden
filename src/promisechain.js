@@ -6,6 +6,7 @@ import {
   identifier,
   isExpressionStatement,
   memberExpression,
+  newExpression,
   returnStatement,
   throwStatement
 } from 'babel-types';
@@ -24,7 +25,16 @@ export default class PromiseChain {
     this._respName = respName;
     this._errName = errName;
 
-    this._ast = callExpression(memberExpression(identifier('Promise'), identifier('resolve')), []);
+    this._ast = newExpression(identifier('Promise'), [
+      functionExpression(
+        null,
+        [
+          identifier('resolve'),
+          identifier('reject'),
+        ],
+        blockStatement([])
+      ),
+    ])
   }
   add(block) {
     if (!block.length) {
@@ -64,6 +74,9 @@ export default class PromiseChain {
     return current;
   }
   _cleanup() {
+    return
+    // XXX disabled for now...
+
     // if resolving to non-undefined when there is no return is allowed, and
     // the last part of the chain is .then(function () {}), then chop off that
     // part
@@ -108,7 +121,8 @@ export default class PromiseChain {
     current.body.push(ast);
   }
   toAST() {
-    this._cleanup();
+//    this._cleanup();
+    return this._ast;
 
     const callee = this._ast.callee.object.callee;
     if (this._inner && callee && callee.object.name === 'Promise') {
